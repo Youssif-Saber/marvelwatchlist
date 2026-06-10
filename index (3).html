@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Marvel Watchlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0E0F14;--surface:#13141B;--surface2:#1A1C26;--surface3:#1F2130;
+  --border:#22253A;--border2:#2E3250;
+  --text:#EDE8DC;--text2:#9A95A8;--text3:#4A4760;
+  --red:#C8324A;--gold:#D4952A;--teal:#2A8B8B;--accent:#7B68EE;
+  --green:#34A853;
+  --pill-bg:#1F2130;--pill-active-bg:#2E3250;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(200,50,74,0.05) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(123,104,238,0.04) 0%,transparent 60%);pointer-events:none;z-index:0}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px 100px;position:relative;z-index:1}
+.top-bar{height:2px;background:linear-gradient(90deg,transparent,var(--red) 30%,var(--gold) 60%,var(--accent))}
+
+/* HEADER */
+.header{padding:40px 0 24px;border-bottom:1px solid var(--border)}
+.eyebrow{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:6px;color:var(--red);text-transform:uppercase;margin-bottom:12px}
+h1{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,7vw,72px);font-weight:300;font-style:italic;letter-spacing:-2px;line-height:0.95}
+h1 strong{font-style:normal;font-weight:600;color:#fff}
+.header-meta{display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px}
+.header-left{display:flex;align-items:center;gap:14px}
+.header-sub{font-size:12px;color:var(--text2);letter-spacing:0.5px}
+.save-pill{font-size:10px;font-weight:500;letter-spacing:2px;padding:3px 10px;border-radius:20px;border:1px solid transparent;transition:all 0.3s;color:transparent}
+.save-pill.saving{color:var(--gold);border-color:rgba(212,149,42,0.3);background:rgba(212,149,42,0.08)}
+.save-pill.saved{color:var(--green);border-color:rgba(52,168,83,0.3);background:rgba(52,168,83,0.08)}
+.header-actions{display:flex;gap:8px}
+.hdr-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:7px 14px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:1px;transition:all 0.2s;white-space:nowrap}
+.hdr-btn:hover{border-color:var(--border2);color:var(--text)}
+.hdr-btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.hdr-btn.primary:hover{background:#a82a3e}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:24px 0 18px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 14px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),transparent)}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;color:#fff;line-height:1}
+.stat-label{font-size:9px;font-weight:500;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-top:5px}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:24px}
+.prog-track{background:var(--surface2);height:3px;border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold),var(--accent));transition:width 0.5s cubic-bezier(.4,0,.2,1)}
+.prog-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:7px}
+
+/* TIME STAT */
+.time-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.time-bar-item{text-align:center}
+.time-bar-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:1px}
+.time-bar-label{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.time-bar-divider{width:1px;height:32px;background:var(--border)}
+
+/* TABS — iOS segmented control style */
+.seg-wrap{background:var(--surface2);border-radius:12px;padding:3px;display:inline-flex;gap:2px;margin-bottom:20px}
+.seg-btn{background:none;border:none;cursor:pointer;padding:8px 20px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;color:var(--text3);transition:all 0.2s;white-space:nowrap}
+.seg-btn.active{background:var(--surface3);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+
+/* iOS-STYLE FILTER PILLS */
+.filter-section{margin-bottom:20px;display:flex;flex-direction:column;gap:10px}
+.filter-row{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.search-bar{position:relative;margin-bottom:4px}
+.search-bar input{
+  width:100%;background:var(--surface2);
+  border:none;border-radius:12px;
+  color:var(--text);padding:11px 16px 11px 42px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;
+  outline:none;transition:background 0.2s;
+}
+.search-bar input:focus{background:var(--surface3)}
+.search-bar input::placeholder{color:var(--text3)}
+.search-bar::before{content:'⌕';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--text3);pointer-events:none}
+.pill{
+  background:var(--pill-bg);border:none;
+  color:var(--text3);padding:7px 14px;
+  border-radius:20px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;
+  letter-spacing:0.3px;transition:all 0.18s;
+  white-space:nowrap;flex-shrink:0;
+}
+.pill:hover{background:var(--pill-active-bg);color:var(--text2)}
+.pill.active{color:#fff;font-weight:500}
+.filter-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text3)}
+.quick-filters{display:flex;gap:6px;flex-wrap:wrap}
+.quick-pill{background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:5px 12px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;transition:all 0.18s;white-space:nowrap}
+.quick-pill:hover{background:var(--surface3);color:var(--text2)}
+.quick-pill.active{background:rgba(200,50,74,0.15);border-color:var(--red);color:var(--red)}
+.sort-select{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:11px;outline:none;cursor:pointer}
+.sort-select option{background:var(--surface)}
+
+/* LIST */
+.list{display:flex;flex-direction:column;gap:3px}
+.item{display:grid;grid-template-columns:32px 3px 1fr auto;gap:0 14px;align-items:center;padding:13px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.15s;user-select:none;position:relative;overflow:hidden}
+.item:active{transform:scale(0.99)}
+.item:hover{border-color:var(--border2);background:var(--surface2)}
+.item.watched{opacity:0.38;border-color:var(--border)}
+.item.watched:hover{background:var(--surface)}
+.item.in-progress{border-left:3px solid var(--gold)}
+.checkbox{width:24px;height:24px;border:1.5px solid var(--border2);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;font-size:12px;color:#fff}
+.item.watched .checkbox{background:var(--red);border-color:var(--red);box-shadow:0 0 10px rgba(200,50,74,0.35)}
+.item.in-progress .checkbox{background:rgba(212,149,42,0.2);border-color:var(--gold);color:var(--gold);font-size:10px}
+.ubar{align-self:stretch;border-radius:2px;flex-shrink:0;width:3px}
+.item-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:400;color:var(--text);line-height:1.2;transition:color 0.15s}
+.item.watched .item-title{color:var(--text3);text-decoration:line-through;text-decoration-color:var(--text3)}
+.item-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tier-badge{font-size:8px;font-weight:500;letter-spacing:1.5px;font-family:'DM Sans',sans-serif;padding:2px 7px;border-radius:6px;text-transform:uppercase}
+.phase-tag{font-size:9px;color:var(--text3);font-family:'DM Sans',sans-serif;letter-spacing:0.5px}
+.custom-badge{font-size:8px;padding:2px 7px;border-radius:6px;background:rgba(123,104,238,0.15);color:#7B68EE;font-family:'DM Sans',sans-serif;letter-spacing:1px;text-transform:uppercase;font-weight:500}
+.item-meta{display:flex;gap:10px;margin-top:3px;font-size:10px;color:var(--text3);font-family:'DM Sans',sans-serif;flex-wrap:wrap;align-items:center}
+.item-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.item-right-info{text-align:right}
+.item-runtime{font-size:10px;color:var(--text3)}
+.item-where{font-size:9px;color:var(--text3);margin-top:2px;opacity:0.6}
+.icon-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:6px;transition:all 0.15s;flex-shrink:0;line-height:1}
+.icon-btn:hover{color:var(--text);background:var(--surface2)}
+.icon-btn.del:hover{color:#C8324A;background:rgba(200,50,74,0.1)}
+.note-indicator{font-size:9px;color:var(--gold);opacity:0.7}
+
+/* SHOW BLOCK */
+.show-block{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color 0.15s}
+.show-block:hover{border-color:var(--border2)}
+.show-block.in-progress{border-left:3px solid var(--gold)}
+.show-header{display:grid;grid-template-columns:32px 3px 1fr auto;gap:0 14px;align-items:center;padding:13px 16px;cursor:pointer;user-select:none}
+.show-header:active{transform:scale(0.99)}
+.show-header.watched-show{opacity:0.38}
+.expand-icon{font-size:11px;color:var(--text3);transition:transform 0.2s;flex-shrink:0}
+.show-block.open .expand-icon{transform:rotate(180deg)}
+.ep-panel{display:none;border-top:1px solid var(--border);padding:16px;background:var(--surface2)}
+.show-block.open .ep-panel{display:block}
+.ep-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ep-label{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;letter-spacing:3px;color:var(--text3);text-transform:uppercase}
+.ep-counter{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text2);letter-spacing:1px}
+.ep-track{background:var(--border);height:5px;border-radius:3px;margin-bottom:12px}
+.ep-fill{height:100%;border-radius:3px;transition:width 0.2s}
+.ep-steps{display:flex;gap:4px;flex-wrap:wrap}
+.ep-dot{width:30px;height:30px;border-radius:8px;border:1px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;font-family:'DM Sans',sans-serif;color:var(--text3);cursor:pointer;transition:all 0.15s}
+.ep-dot:hover{border-color:var(--red);color:var(--text)}
+.ep-dot.watched{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 6px rgba(200,50,74,0.25)}
+.note-area{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+.note-area textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;resize:none;height:60px;transition:border-color 0.2s;font-weight:300}
+.note-area textarea:focus{border-color:var(--border2)}
+.note-area textarea::placeholder{color:var(--text3)}
+
+/* UNIVERSE VIEW */
+.uni-list{display:flex;flex-direction:column;gap:8px}
+.uni-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;transition:border-color 0.2s}
+.uni-card:hover{border-color:var(--border2)}
+.uni-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.uni-left{display:flex;align-items:center;gap:10px}
+.uni-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.uni-name{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--text)}
+.uni-count{font-size:10px;color:var(--text3);margin-top:1px}
+.uni-pct{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px}
+.uni-track{background:var(--surface2);height:3px;border-radius:3px;overflow:hidden}
+.uni-fill{height:100%;transition:width 0.5s cubic-bezier(.4,0,.2,1);border-radius:3px}
+
+/* STATS VIEW */
+.stats-view{display:flex;flex-direction:column;gap:14px}
+.stats-section-title{font-size:9px;font-weight:500;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:2px;font-family:'DM Sans',sans-serif}
+.tier-breakdown{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tier-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.tier-card-val{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;line-height:1}
+.tier-card-label{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:4px;font-family:'DM Sans',sans-serif}
+.tier-card-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.next-up{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.next-up-title{font-size:9px;font-weight:500;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;font-family:'DM Sans',sans-serif}
+.next-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.next-item:last-child{border-bottom:none;padding-bottom:0}
+.next-num{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text3);width:20px;flex-shrink:0}
+.next-info{flex:1;min-width:0}
+.next-title{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next-meta{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:1000;align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:600px){.modal-overlay{align-items:center;padding:20px}}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;padding:28px 24px 40px;position:relative}
+@media(min-width:600px){.modal{border-radius:16px;padding:32px}}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px}
+@media(min-width:600px){.modal-handle{display:none}}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;font-style:italic;color:var(--text);margin-bottom:4px}
+.modal-sub{font-size:11px;color:var(--text3);letter-spacing:0.5px;margin-bottom:22px}
+.modal-close{position:absolute;top:18px;right:18px;background:var(--surface2);border:none;color:var(--text3);font-size:14px;cursor:pointer;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.modal-close:hover{color:var(--text);background:var(--surface3)}
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:9px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;font-family:'DM Sans',sans-serif}
+.form-row input,.form-row select,.form-row textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;outline:none;transition:all 0.2s;-webkit-appearance:none}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--border2);background:var(--surface3)}
+.form-row select option{background:var(--surface2)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ep-field{display:none}
+.ep-field.show{display:block}
+.form-actions{display:flex;gap:8px;margin-top:20px;justify-content:flex-end}
+.btn-cancel{background:var(--surface2);border:none;color:var(--text2);padding:11px 20px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:1px;transition:all 0.2s}
+.btn-cancel:hover{background:var(--surface3)}
+.btn-submit{background:var(--red);border:none;color:#fff;padding:11px 24px;border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:1px;transition:all 0.2s}
+.btn-submit:hover{background:#a82a3e}
+
+/* NOTE MODAL */
+.note-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:1001;align-items:center;justify-content:center;padding:20px}
+.note-modal.open{display:flex}
+.note-box{background:var(--surface);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:440px;padding:24px}
+.note-box-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-style:italic;color:var(--text);margin-bottom:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note-box textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;outline:none;resize:none;height:100px;margin-bottom:14px;transition:border-color 0.2s}
+.note-box textarea:focus{border-color:var(--border2)}
+.note-box-actions{display:flex;justify-content:flex-end;gap:8px}
+
+/* LEGEND */
+.legend{margin-top:40px;border-top:1px solid var(--border);padding-top:24px;display:grid;grid-template-columns:repeat(2,1fr);gap:28px}
+.legend-title{font-size:9px;font-weight:500;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:12px;font-family:'DM Sans',sans-serif}
+.legend-row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text2);margin-bottom:7px;font-family:'DM Sans',sans-serif;font-weight:300}
+.ldot{width:8px;height:8px;border-radius:3px;flex-shrink:0}
+.footer{margin-top:36px;text-align:center;font-size:9px;color:var(--text3);letter-spacing:4px;text-transform:uppercase;font-family:'DM Sans',sans-serif}
+.empty{text-align:center;color:var(--text3);padding:70px 20px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px}
+
+/* EXPORT TOAST */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface3);border:1px solid var(--border2);color:var(--text);padding:12px 20px;border-radius:12px;font-size:12px;font-family:'DM Sans',sans-serif;letter-spacing:0.5px;opacity:0;transition:all 0.3s;z-index:2000;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="top-bar"></div>
+<div class="wrap">
+
+  <div class="header">
+    <div class="eyebrow">The Complete Archive &nbsp;·&nbsp; 1944 — 2026</div>
+    <h1><strong>Every Marvel</strong><br>Film &amp; Series</h1>
+    <div class="header-meta">
+      <div class="header-left">
+        <span class="header-sub" id="header-sub"></span>
+        <span class="save-pill" id="save-pill"></span>
+      </div>
+      <div class="header-actions">
+        <button class="hdr-btn" onclick="exportProgress()">↑ Export</button>
+        <button class="hdr-btn" onclick="triggerImport()">↓ Import</button>
+        <button class="hdr-btn primary" onclick="openAddModal()">+ Add Title</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="s-watched">0</div><div class="stat-label">Watched</div><div class="stat-sub" id="s-watched-sub"></div></div>
+    <div class="stat"><div class="stat-val" id="s-essential">0</div><div class="stat-label">Essentials</div><div class="stat-sub" id="s-essential-sub"></div></div>
+    <div class="stat"><div class="stat-val" id="s-pct">0%</div><div class="stat-label">Complete</div><div class="stat-sub">overall</div></div>
+    <div class="stat"><div class="stat-val" id="s-rem">0</div><div class="stat-label">Remaining</div><div class="stat-sub">to go</div></div>
+  </div>
+
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-label"><span>Overall Progress</span><span id="prog-pct-label">0%</span></div>
+  </div>
+
+  <div class="time-bar" id="time-bar">
+    <div class="time-bar-item"><div class="time-bar-val" id="tb-total">0h</div><div class="time-bar-label">Total Runtime</div></div>
+    <div class="time-bar-divider"></div>
+    <div class="time-bar-item"><div class="time-bar-val" id="tb-watched">0h</div><div class="time-bar-label">Watched</div></div>
+    <div class="time-bar-divider"></div>
+    <div class="time-bar-item"><div class="time-bar-val" id="tb-remaining">0h</div><div class="time-bar-label">Remaining</div></div>
+    <div class="time-bar-divider"></div>
+    <div class="time-bar-item"><div class="time-bar-val" id="tb-days">0d</div><div class="time-bar-label">Days of Content</div></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="seg-wrap">
+    <button class="seg-btn active" onclick="switchView('list',this)">Watch List</button>
+    <button class="seg-btn" onclick="switchView('universe',this)">By Universe</button>
+    <button class="seg-btn" onclick="switchView('stats',this)">Stats</button>
+  </div>
+
+  <!-- LIST VIEW -->
+  <div id="view-list">
+    <div class="filter-section">
+      <div class="search-bar"><input id="search" placeholder="Search titles..." oninput="render()"/></div>
+
+      <!-- Universe pills — horizontal scroll -->
+      <div class="filter-row" id="uni-pills"></div>
+
+      <!-- Tier pills -->
+      <div class="filter-row" id="tier-pills"></div>
+
+      <!-- Type pills -->
+      <div class="filter-row" id="type-pills"></div>
+
+      <!-- Quick filters + sort -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div class="quick-filters">
+          <button class="quick-pill" id="qf-hide-watched" onclick="toggleQuick('hideWatched')">Hide Watched</button>
+          <button class="quick-pill" id="qf-essentials" onclick="toggleQuick('essentialsOnly')">Essentials Only</button>
+          <button class="quick-pill" id="qf-in-progress" onclick="toggleQuick('inProgress')">In Progress</button>
+        </div>
+        <select class="sort-select" id="sort-select" onchange="render()">
+          <option value="year">Sort: Year</option>
+          <option value="title">Sort: Title A–Z</option>
+          <option value="tier">Sort: Tier</option>
+          <option value="universe">Sort: Universe</option>
+        </select>
+      </div>
+
+      <div class="filter-meta">
+        <span id="filter-count"></span>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <!-- UNIVERSE VIEW -->
+  <div id="view-universe" style="display:none"><div class="uni-list" id="uni-list"></div></div>
+
+  <!-- STATS VIEW -->
+  <div id="view-stats" style="display:none"><div class="stats-view" id="stats-view"></div></div>
+
+  <!-- ADD MODAL -->
+  <div class="modal-overlay" id="modal-add" onclick="closeOnOverlay(event,'modal-add')">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="closeModal('modal-add')">✕</button>
+      <div class="modal-title" id="modal-add-title">Add a Title</div>
+      <div class="modal-sub">Movies, shows, specials — anything Marvel</div>
+      <div class="form-row"><label>Title *</label><input id="f-title" placeholder="e.g. Spider-Man Noir"/></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Year</label><input id="f-year" type="number" placeholder="2025"/></div>
+        <div class="form-row"><label>Type</label>
+          <select id="f-type" onchange="onTypeChange()">
+            <option value="Movie">Movie</option><option value="Show">Show</option>
+            <option value="Special">Special</option><option value="Serial">Serial</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row"><label>Universe</label>
+        <select id="f-universe">
+          <option>MCU</option><option>MCU Netflix</option><option>MCU ABC</option>
+          <option>MCU Freeform</option><option>MCU Hulu</option><option>MCU Animated</option>
+          <option>Fox X-Men</option><option>Fox Fantastic Four</option><option>Fox/FX</option>
+          <option>Sony Spider-Man (Raimi)</option><option>Sony Spider-Man (Garfield)</option>
+          <option>Sony Spider-Verse</option><option>Sony Spider-Verse (Animated)</option>
+          <option>Blade</option><option>Pre-MCU 2000s</option><option>Pre-MCU</option>
+          <option>Vintage</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Tier</label>
+          <select id="f-tier">
+            <option>Essential</option><option>Watch Once</option><option>Optional</option><option>Skip</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Phase (MCU)</label>
+          <select id="f-phase">
+            <option value="">None</option><option>Phase 1</option><option>Phase 2</option>
+            <option>Phase 3</option><option>Phase 4</option><option>Phase 5</option><option>Phase 6</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Runtime</label><input id="f-runtime" placeholder="e.g. 1h 52m or ~6h"/></div>
+        <div class="form-row"><label>Where to Watch</label><input id="f-where" placeholder="e.g. Disney+"/></div>
+      </div>
+      <div class="form-row ep-field" id="ep-field"><label>Number of Episodes</label><input id="f-episodes" type="number" min="1" placeholder="e.g. 13"/></div>
+      <div class="form-row"><label>Notes (optional)</label><textarea id="f-note" placeholder="e.g. Watch before Infinity War" rows="2" style="height:60px"></textarea></div>
+      <input type="hidden" id="f-edit-id" value=""/>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeModal('modal-add')">Cancel</button>
+        <button class="btn-submit" id="btn-submit-add" onclick="submitAdd()">Add Title</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTE MODAL -->
+  <div class="note-modal" id="modal-note" onclick="closeOnOverlay(event,'modal-note')">
+    <div class="note-box">
+      <div class="note-box-title" id="note-modal-title"></div>
+      <textarea id="note-modal-text" placeholder="Add a note..."></textarea>
+      <div class="note-box-actions">
+        <button class="btn-cancel" onclick="closeModal('modal-note')">Cancel</button>
+        <button class="btn-submit" onclick="saveNote()">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <div class="legend">
+    <div>
+      <div class="legend-title">Tier Guide</div>
+      <div class="legend-row"><span style="color:#C8324A">🔴</span><span><strong style="color:#C8324A">Essential</strong> — required viewing</span></div>
+      <div class="legend-row"><span style="color:#D4952A">🟡</span><span><strong style="color:#D4952A">Watch Once</strong> — worthwhile, not critical</span></div>
+      <div class="legend-row"><span style="color:#2A8B8B">🔵</span><span><strong style="color:#2A8B8B">Optional</strong> — for completionists</span></div>
+      <div class="legend-row"><span style="color:#4A4760">⚫</span><span><strong style="color:#4A4760">Skip</strong> — save your hours</span></div>
+    </div>
+    <div><div class="legend-title">Universes</div><div id="legend-unis"></div></div>
+  </div>
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+const SK='marvel-watchlist-v5';
+const UC={
+  "Vintage":"#8B6914","Pre-MCU":"#6B4C9A","Pre-MCU 2000s":"#9A4C6B","Blade":"#C8324A",
+  "Fox X-Men":"#D4952A","Fox Fantastic Four":"#2A8B8B","Fox/FX":"#7B68EE",
+  "Sony Spider-Man (Raimi)":"#3B6CC7","Sony Spider-Man (Garfield)":"#2E4A8A",
+  "Sony Spider-Verse":"#9B59B6","Sony Spider-Verse (Animated)":"#8E44AD",
+  "MCU":"#C8324A","MCU Netflix":"#6B1A2A","MCU ABC":"#1A5A7A",
+  "MCU Freeform":"#1A7A5E","MCU Hulu":"#1CE783","MCU Animated":"#D4952A","Other":"#555"
+};
+const TC={
+  "Essential":{color:"#C8324A",bg:"rgba(200,50,74,0.12)"},
+  "Watch Once":{color:"#D4952A",bg:"rgba(212,149,42,0.12)"},
+  "Optional":{color:"#2A8B8B",bg:"rgba(42,139,139,0.12)"},
+  "Skip":{color:"#4A4760",bg:"rgba(74,71,96,0.15)"}
+};
+const ERA=["Vintage","Pre-MCU","Pre-MCU 2000s","Blade","Fox X-Men","Fox Fantastic Four","Fox/FX","Sony Spider-Man (Raimi)","Sony Spider-Man (Garfield)","Sony Spider-Verse","Sony Spider-Verse (Animated)","MCU","MCU Netflix","MCU ABC","MCU Freeform","MCU Hulu","MCU Animated"];
+const TIER_ORDER=["Essential","Watch Once","Optional","Skip"];
+
+const DATA=[
+  // VINTAGE
+  {id:0,title:"Captain America (1944 Serial)",year:1944,universe:"Vintage",type:"Serial",tier:"Optional",where:"Archive.org",runtime:"~4h"},
+  {id:100,title:"The Amazing Spider-Man (1977 TV Pilot)",year:1977,universe:"Vintage",type:"Movie",tier:"Optional",where:"YouTube",runtime:"1h 34m"},
+  {id:101,title:"Doctor Strange (1978 TV Movie)",year:1978,universe:"Vintage",type:"Movie",tier:"Optional",where:"YouTube",runtime:"1h 34m"},
+  {id:102,title:"Captain America (1979 TV Movie)",year:1979,universe:"Vintage",type:"Movie",tier:"Optional",where:"YouTube",runtime:"1h 37m"},
+  {id:103,title:"Captain America II: Death Too Soon",year:1979,universe:"Vintage",type:"Movie",tier:"Optional",where:"YouTube",runtime:"1h 37m"},
+  {id:104,title:"Howard the Duck",year:1986,universe:"Vintage",type:"Movie",tier:"Watch Once",where:"Rent/YouTube",runtime:"1h 50m"},
+  // PRE-MCU
+  {id:105,title:"The Incredible Hulk Returns",year:1988,universe:"Pre-MCU",type:"Movie",tier:"Watch Once",where:"YouTube",runtime:"1h 40m"},
+  {id:106,title:"The Trial of the Incredible Hulk",year:1989,universe:"Pre-MCU",type:"Movie",tier:"Watch Once",where:"YouTube",runtime:"1h 40m"},
+  {id:107,title:"The Punisher (1989)",year:1989,universe:"Pre-MCU",type:"Movie",tier:"Watch Once",where:"Rent/YouTube",runtime:"1h 29m"},
+  {id:108,title:"The Death of the Incredible Hulk",year:1990,universe:"Pre-MCU",type:"Movie",tier:"Optional",where:"YouTube",runtime:"1h 35m"},
+  {id:109,title:"Captain America (1990)",year:1990,universe:"Pre-MCU",type:"Movie",tier:"Watch Once",where:"YouTube/Rent",runtime:"1h 37m"},
+  {id:110,title:"Fantastic Four (1994 — Unreleased Corman)",year:1994,universe:"Pre-MCU",type:"Movie",tier:"Watch Once",where:"YouTube (leaked)",runtime:"1h 30m"},
+  {id:111,title:"Generation X (1996 TV Movie)",year:1996,universe:"Pre-MCU",type:"Movie",tier:"Optional",where:"YouTube",runtime:"1h 27m"},
+  {id:112,title:"Nick Fury: Agent of S.H.I.E.L.D. (1998)",year:1998,universe:"Pre-MCU",type:"Movie",tier:"Watch Once",where:"YouTube",runtime:"1h 27m"},
+  // BLADE
+  {id:113,title:"Blade",year:1998,universe:"Blade",type:"Movie",tier:"Essential",where:"Disney+/Rent",runtime:"2h 1m"},
+  {id:114,title:"Blade II",year:2002,universe:"Blade",type:"Movie",tier:"Essential",where:"Disney+/Rent",runtime:"1h 57m"},
+  {id:115,title:"Blade: Trinity",year:2004,universe:"Blade",type:"Movie",tier:"Watch Once",where:"Disney+/Rent",runtime:"1h 53m"},
+  {id:200,title:"Blade (2006 TV Series)",year:2006,universe:"Blade",type:"Show",tier:"Optional",where:"Tubi (free)",runtime:"~10h",episodes:13},
+  // PRE-MCU 2000s
+  {id:116,title:"Daredevil (2003 — Ben Affleck)",year:2003,universe:"Pre-MCU 2000s",type:"Movie",tier:"Watch Once",where:"Disney+",runtime:"1h 43m"},
+  {id:117,title:"Hulk (2003 — Ang Lee)",year:2003,universe:"Pre-MCU 2000s",type:"Movie",tier:"Watch Once",where:"Rent",runtime:"2h 18m"},
+  {id:118,title:"The Punisher (2004)",year:2004,universe:"Pre-MCU 2000s",type:"Movie",tier:"Watch Once",where:"Rent",runtime:"2h 4m"},
+  {id:119,title:"Elektra (2005)",year:2005,universe:"Pre-MCU 2000s",type:"Movie",tier:"Skip",where:"Disney+",runtime:"1h 37m"},
+  {id:123,title:"Man-Thing (2005)",year:2005,universe:"Pre-MCU 2000s",type:"Movie",tier:"Skip",where:"YouTube/Rent",runtime:"1h 37m"},
+  {id:120,title:"Ghost Rider (2007)",year:2007,universe:"Pre-MCU 2000s",type:"Movie",tier:"Watch Once",where:"Rent",runtime:"1h 50m"},
+  {id:121,title:"Punisher: War Zone (2008)",year:2008,universe:"Pre-MCU 2000s",type:"Movie",tier:"Watch Once",where:"Rent",runtime:"1h 42m"},
+  {id:122,title:"Ghost Rider: Spirit of Vengeance (2012)",year:2012,universe:"Pre-MCU 2000s",type:"Movie",tier:"Skip",where:"Rent",runtime:"1h 36m"},
+  // FOX X-MEN
+  {id:1,title:"X-Men",year:2000,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"1h 44m"},
+  {id:3,title:"X2: X-Men United",year:2003,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"2h 14m"},
+  {id:6,title:"X-Men: The Last Stand",year:2006,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"1h 44m"},
+  {id:9,title:"X-Men Origins: Wolverine",year:2009,universe:"Fox X-Men",type:"Movie",tier:"Watch Once",where:"Disney+",runtime:"1h 47m"},
+  {id:10,title:"X-Men: First Class",year:2011,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"2h 12m"},
+  {id:13,title:"The Wolverine",year:2013,universe:"Fox X-Men",type:"Movie",tier:"Watch Once",where:"Disney+",runtime:"2h 6m"},
+  {id:14,title:"X-Men: Days of Future Past",year:2014,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"2h 12m"},
+  {id:16,title:"Deadpool",year:2016,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"1h 48m"},
+  {id:17,title:"X-Men: Apocalypse",year:2016,universe:"Fox X-Men",type:"Movie",tier:"Watch Once",where:"Disney+",runtime:"2h 24m"},
+  {id:18,title:"Logan",year:2017,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"2h 17m"},
+  {id:19,title:"Deadpool 2",year:2018,universe:"Fox X-Men",type:"Movie",tier:"Essential",where:"Disney+",runtime:"1h 59m"},
+  {id:20,title:"X-Men: Dark Phoenix",year:2019,universe:"Fox X-Men",type:"Movie",tier:"Skip",where:"Disney+",runtime:"1h 53m"},
+  {id:21,title:"The New Mutants",year:2020,universe:"Fox X-Men",type:"Movie",tier:"Skip",where:"Disney+",runtime:"1h 34m"},
+  // FOX/FX
+  {id:201,title:"Legion (S1)",year:2017,universe:"Fox/FX",type:"Show",tier:"Essential",where:"Hulu/Disney+",runtime:"~8h",episodes:8},
+  {id:202,title:"The Gifted (S1)",year:2017,universe:"Fox/FX",type:"Show",tier:"Watch Once",where:"Hulu",runtime:"~11h",episodes:13},
+  {id:203,title:"Legion (S2)",year:2018,universe:"Fox/FX",type:"Show",tier:"Essential",where:"Hulu/Disney+",runtime:"~10h",episodes:11},
+  {id:204,title:"The Gifted (S2)",year:2018,universe:"Fox/FX",type:"Show",tier:"Watch Once",where:"Hulu",runtime:"~11h",episodes:16},
+  {id:205,title:"Legion (S3)",year:2019,universe:"Fox/FX",type:"Show",tier:"Essential",where:"Hulu/Disney+",runtime:"~6h",episodes:6},
+  // FOX FANTASTIC FOUR
+  {id:5,title:"Fantastic Four (2005)",year:2005,universe:"Fox Fantastic Four",type:"Movie",tier:"Optional",where:"Disney+",runtime:"1h 46m"},
+  {id:8,title:"Fantastic Four: Rise of the Silver Surfer",year:2007,universe:"Fox Fantastic Four",type:"Movie",tier:"Optional",where:"Disney+",runtime:"1h 32m"},
+  {id:15,title:"Fantastic Four (2015)",year:2015,universe:"Fox Fantastic Four",type:"Movie",tier:"Skip",where:"Disney+",runtime:"1h 40m"},
+  // SONY
+  {id:2,title:"Spider-Man (2002)",year:2002,universe:"Sony Spider-Man (Raimi)",type:"Movie",tier:"Essential",where:"Netflix/Rent",runtime:"2h 1m"},
+  {id:4,title:"Spider-Man 2",year:2004,universe:"Sony Spider-Man (Raimi)",type:"Movie",tier:"Essential",where:"Netflix/Rent",runtime:"2h 7m"},
+  {id:7,title:"Spider-Man 3",year:2007,universe:"Sony Spider-Man (Raimi)",type:"Movie",tier:"Watch Once",where:"Netflix/Rent",runtime:"2h 19m"},
+  {id:11,title:"The Amazing Spider-Man",year:2012,universe:"Sony Spider-Man (Garfield)",type:"Movie",tier:"Essential",where:"Starz/Rent",runtime:"2h 16m"},
+  {id:12,title:"The Amazing Spider-Man 2",year:2014,universe:"Sony Spider-Man (Garfield)",type:"Movie",tier:"Watch Once",where:"Starz/Rent",runtime:"2h 22m"},
+  {id:22,title:"Venom",year:2018,universe:"Sony Spider-Verse",type:"Movie",tier:"Optional",where:"Netflix/Rent",runtime:"1h 52m"},
+  {id:24,title:"Morbius",year:2022,universe:"Sony Spider-Verse",type:"Movie",tier:"Skip",where:"Rent",runtime:"1h 44m"},
+  {id:26,title:"Madame Web",year:2024,universe:"Sony Spider-Verse",type:"Movie",tier:"Skip",where:"Rent",runtime:"1h 56m"},
+  {id:27,title:"Kraven the Hunter",year:2024,universe:"Sony Spider-Verse",type:"Movie",tier:"Skip",where:"Rent",runtime:"2h 7m"},
+  {id:28,title:"Venom: The Last Dance",year:2024,universe:"Sony Spider-Verse",type:"Movie",tier:"Optional",where:"Rent",runtime:"1h 49m"},
+  {id:23,title:"Spider-Man: Into the Spider-Verse",year:2018,universe:"Sony Spider-Verse (Animated)",type:"Movie",tier:"Essential",where:"Netflix",runtime:"1h 57m"},
+  {id:25,title:"Spider-Man: Across the Spider-Verse",year:2023,universe:"Sony Spider-Verse (Animated)",type:"Movie",tier:"Essential",where:"Netflix",runtime:"2h 20m"},
+  // MCU PHASE 1
+  {id:29,title:"Iron Man",year:2008,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 1",runtime:"2h 6m"},
+  {id:30,title:"The Incredible Hulk",year:2008,universe:"MCU",type:"Movie",tier:"Watch Once",where:"Disney+",phase:"Phase 1",runtime:"1h 52m"},
+  {id:31,title:"Iron Man 2",year:2010,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 1",runtime:"2h 4m"},
+  {id:32,title:"Thor",year:2011,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 1",runtime:"1h 55m"},
+  {id:33,title:"Captain America: The First Avenger",year:2011,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 1",runtime:"2h 4m"},
+  {id:34,title:"The Avengers",year:2012,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 1",runtime:"2h 23m"},
+  // MCU ABC
+  {id:206,title:"Agents of S.H.I.E.L.D. (S1)",year:2013,universe:"MCU ABC",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~17h",episodes:22},
+  {id:35,title:"Iron Man 3",year:2013,universe:"MCU",type:"Movie",tier:"Watch Once",where:"Disney+",phase:"Phase 2",runtime:"2h 10m"},
+  {id:36,title:"Thor: The Dark World",year:2013,universe:"MCU",type:"Movie",tier:"Watch Once",where:"Disney+",phase:"Phase 2",runtime:"1h 52m"},
+  {id:207,title:"Agents of S.H.I.E.L.D. (S2)",year:2014,universe:"MCU ABC",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~18h",episodes:22},
+  {id:37,title:"Captain America: The Winter Soldier",year:2014,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 2",runtime:"2h 16m"},
+  {id:38,title:"Guardians of the Galaxy",year:2014,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 2",runtime:"2h 1m"},
+  {id:208,title:"Agent Carter (S1)",year:2015,universe:"MCU ABC",type:"Show",tier:"Essential",where:"Disney+",runtime:"~7h",episodes:8},
+  {id:209,title:"Agents of S.H.I.E.L.D. (S3)",year:2015,universe:"MCU ABC",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~18h",episodes:22},
+  {id:52,title:"Daredevil (S1)",year:2015,universe:"MCU Netflix",type:"Show",tier:"Essential",where:"Disney+",runtime:"~13h",episodes:13},
+  {id:53,title:"Jessica Jones (S1)",year:2015,universe:"MCU Netflix",type:"Show",tier:"Essential",where:"Disney+",runtime:"~11h",episodes:13},
+  {id:39,title:"Avengers: Age of Ultron",year:2015,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 2",runtime:"2h 21m"},
+  {id:40,title:"Ant-Man",year:2015,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 2",runtime:"1h 57m"},
+  {id:210,title:"Agent Carter (S2)",year:2016,universe:"MCU ABC",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~7h",episodes:10},
+  {id:211,title:"Agents of S.H.I.E.L.D. (S4)",year:2016,universe:"MCU ABC",type:"Show",tier:"Essential",where:"Disney+",runtime:"~19h",episodes:22},
+  {id:54,title:"Daredevil (S2)",year:2016,universe:"MCU Netflix",type:"Show",tier:"Essential",where:"Disney+",runtime:"~13h",episodes:13},
+  {id:55,title:"Luke Cage (S1)",year:2016,universe:"MCU Netflix",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~12h",episodes:13},
+  {id:41,title:"Captain America: Civil War",year:2016,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 28m"},
+  {id:42,title:"Doctor Strange",year:2016,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"1h 55m"},
+  {id:212,title:"Agents of S.H.I.E.L.D. (S5)",year:2017,universe:"MCU ABC",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~18h",episodes:22},
+  {id:213,title:"Inhumans",year:2017,universe:"MCU ABC",type:"Show",tier:"Skip",where:"Disney+",runtime:"~6h",episodes:8},
+  {id:56,title:"Iron Fist (S1)",year:2017,universe:"MCU Netflix",type:"Show",tier:"Skip",where:"Disney+",runtime:"~12h",episodes:13},
+  {id:57,title:"The Defenders",year:2017,universe:"MCU Netflix",type:"Show",tier:"Essential",where:"Disney+",runtime:"~6h",episodes:8},
+  {id:58,title:"The Punisher (S1)",year:2017,universe:"MCU Netflix",type:"Show",tier:"Essential",where:"Disney+",runtime:"~13h",episodes:13},
+  {id:215,title:"Runaways (S1)",year:2017,universe:"MCU Hulu",type:"Show",tier:"Watch Once",where:"Hulu/Disney+",runtime:"~10h",episodes:10},
+  {id:43,title:"Guardians of the Galaxy Vol. 2",year:2017,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 16m"},
+  {id:44,title:"Spider-Man: Homecoming",year:2017,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 13m"},
+  {id:45,title:"Thor: Ragnarok",year:2017,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 10m"},
+  {id:214,title:"Cloak & Dagger (S1)",year:2018,universe:"MCU Freeform",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~8h",episodes:10},
+  {id:216,title:"Runaways (S2)",year:2018,universe:"MCU Hulu",type:"Show",tier:"Watch Once",where:"Hulu/Disney+",runtime:"~10h",episodes:13},
+  {id:59,title:"Jessica Jones (S2)",year:2018,universe:"MCU Netflix",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~11h",episodes:13},
+  {id:60,title:"Luke Cage (S2)",year:2018,universe:"MCU Netflix",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~13h",episodes:13},
+  {id:61,title:"Iron Fist (S2)",year:2018,universe:"MCU Netflix",type:"Show",tier:"Skip",where:"Disney+",runtime:"~10h",episodes:10},
+  {id:62,title:"Daredevil (S3)",year:2018,universe:"MCU Netflix",type:"Show",tier:"Essential",where:"Disney+",runtime:"~13h",episodes:13},
+  {id:46,title:"Black Panther",year:2018,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 14m"},
+  {id:47,title:"Avengers: Infinity War",year:2018,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 29m"},
+  {id:48,title:"Ant-Man and the Wasp",year:2018,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"1h 58m"},
+  {id:217,title:"Cloak & Dagger (S2)",year:2019,universe:"MCU Freeform",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~8h",episodes:10},
+  {id:218,title:"Runaways (S3)",year:2019,universe:"MCU Hulu",type:"Show",tier:"Watch Once",where:"Hulu/Disney+",runtime:"~9h",episodes:10},
+  {id:219,title:"Agents of S.H.I.E.L.D. (S6)",year:2019,universe:"MCU ABC",type:"Show",tier:"Optional",where:"Disney+",runtime:"~10h",episodes:13},
+  {id:63,title:"The Punisher (S2)",year:2019,universe:"MCU Netflix",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~13h",episodes:13},
+  {id:64,title:"Jessica Jones (S3)",year:2019,universe:"MCU Netflix",type:"Show",tier:"Watch Once",where:"Disney+",runtime:"~10h",episodes:13},
+  {id:49,title:"Captain Marvel",year:2019,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 4m"},
+  {id:50,title:"Avengers: Endgame",year:2019,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"3h 1m"},
+  {id:51,title:"Spider-Man: Far From Home",year:2019,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 3",runtime:"2h 9m"},
+  {id:220,title:"Agents of S.H.I.E.L.D. (S7)",year:2020,universe:"MCU ABC",type:"Show",tier:"Optional",where:"Disney+",runtime:"~10h",episodes:13},
+  {id:222,title:"M.O.D.O.K.",year:2021,universe:"MCU Hulu",type:"Show",tier:"Optional",where:"Hulu/Disney+",runtime:"~3h",episodes:10},
+  {id:225,title:"Hit-Monkey (S1)",year:2021,universe:"MCU Animated",type:"Show",tier:"Optional",where:"Hulu/Disney+",runtime:"~4h",episodes:10},
+  {id:65,title:"WandaVision",year:2021,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"~5h",episodes:9},
+  {id:66,title:"The Falcon and the Winter Soldier",year:2021,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"~6h",episodes:6},
+  {id:67,title:"Loki (S1)",year:2021,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"~5h",episodes:6},
+  {id:68,title:"Black Widow",year:2021,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"2h 14m"},
+  {id:69,title:"What If...? (S1)",year:2021,universe:"MCU Animated",type:"Show",tier:"Watch Once",where:"Disney+",phase:"Phase 4",runtime:"~7h",episodes:9},
+  {id:70,title:"Shang-Chi and the Legend of the Ten Rings",year:2021,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"2h 12m"},
+  {id:71,title:"Eternals",year:2021,universe:"MCU",type:"Movie",tier:"Watch Once",where:"Disney+",phase:"Phase 4",runtime:"2h 36m"},
+  {id:72,title:"Hawkeye",year:2021,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"~6h",episodes:6},
+  {id:73,title:"Spider-Man: No Way Home",year:2021,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"2h 28m"},
+  {id:74,title:"Moon Knight",year:2022,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"~5h",episodes:6},
+  {id:75,title:"Doctor Strange in the Multiverse of Madness",year:2022,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"2h 6m"},
+  {id:76,title:"Ms. Marvel",year:2022,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"~5h",episodes:6},
+  {id:77,title:"Thor: Love and Thunder",year:2022,universe:"MCU",type:"Movie",tier:"Watch Once",where:"Disney+",phase:"Phase 4",runtime:"1h 59m"},
+  {id:221,title:"Werewolf by Night",year:2022,universe:"MCU",type:"Special",tier:"Watch Once",where:"Disney+",phase:"Phase 4",runtime:"55m"},
+  {id:78,title:"She-Hulk: Attorney at Law",year:2022,universe:"MCU",type:"Show",tier:"Watch Once",where:"Disney+",phase:"Phase 4",runtime:"~5h",episodes:9},
+  {id:79,title:"Black Panther: Wakanda Forever",year:2022,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 4",runtime:"2h 41m"},
+  {id:80,title:"Guardians of the Galaxy Holiday Special",year:2022,universe:"MCU",type:"Special",tier:"Optional",where:"Disney+",phase:"Phase 4",runtime:"44m"},
+  {id:81,title:"Ant-Man and the Wasp: Quantumania",year:2023,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 5",runtime:"2h 4m"},
+  {id:82,title:"Secret Invasion",year:2023,universe:"MCU",type:"Show",tier:"Watch Once",where:"Disney+",phase:"Phase 5",runtime:"~4h",episodes:6},
+  {id:83,title:"Guardians of the Galaxy Vol. 3",year:2023,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 5",runtime:"2h 29m"},
+  {id:223,title:"The Marvels",year:2023,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 5",runtime:"1h 45m"},
+  {id:84,title:"Loki (S2)",year:2023,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 5",runtime:"~5h",episodes:6},
+  {id:88,title:"What If...? (S2)",year:2023,universe:"MCU Animated",type:"Show",tier:"Optional",where:"Disney+",phase:"Phase 5",runtime:"~7h",episodes:9},
+  {id:224,title:"X-Men '97 (S1)",year:2024,universe:"MCU Animated",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 5",runtime:"~5h",episodes:10},
+  {id:85,title:"Echo",year:2024,universe:"MCU",type:"Show",tier:"Watch Once",where:"Disney+",phase:"Phase 5",runtime:"~4h",episodes:5},
+  {id:86,title:"Deadpool & Wolverine",year:2024,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 5",runtime:"2h 8m"},
+  {id:87,title:"Agatha All Along",year:2024,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 5",runtime:"~8h",episodes:9},
+  {id:89,title:"What If...? (S3)",year:2024,universe:"MCU Animated",type:"Show",tier:"Optional",where:"Disney+",phase:"Phase 5",runtime:"~7h",episodes:9},
+  {id:94,title:"Eyes of Wakanda",year:2024,universe:"MCU Animated",type:"Show",tier:"Watch Once",where:"Disney+",phase:"Phase 5",runtime:"~4h",episodes:4},
+  {id:226,title:"Hit-Monkey (S2)",year:2024,universe:"MCU Animated",type:"Show",tier:"Optional",where:"Hulu/Disney+",runtime:"~4h",episodes:10},
+  {id:90,title:"Your Friendly Neighborhood Spider-Man (S1)",year:2025,universe:"MCU Animated",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"~5h",episodes:10},
+  {id:91,title:"Captain America: Brave New World",year:2025,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"1h 58m"},
+  {id:92,title:"Daredevil: Born Again (S1)",year:2025,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"~8h",episodes:9},
+  {id:93,title:"Thunderbolts*",year:2025,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"2h 7m"},
+  {id:95,title:"The Fantastic Four: First Steps",year:2025,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"2h 5m"},
+  {id:96,title:"Ironheart",year:2025,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"~6h",episodes:6},
+  {id:227,title:"Wonder Man (S1)",year:2026,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"~6h",episodes:8},
+  {id:228,title:"Daredevil: Born Again (S2)",year:2026,universe:"MCU",type:"Show",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"~8h",episodes:8},
+  {id:229,title:"The Punisher: One Last Kill",year:2026,universe:"MCU",type:"Special",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"51m"},
+  {id:97,title:"Avengers: Doomsday",year:2026,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"TBD"},
+  {id:98,title:"Spider-Man: Brand New Day",year:2026,universe:"MCU",type:"Movie",tier:"Essential",where:"Disney+",phase:"Phase 6",runtime:"TBD"}
+];
+
+// STATE
+let W={},EP={},NOTES={},CUSTOM=[],nextCID=90000;
+let fU='All',fT='All',fTy='All',curView='list',saveTimer=null;
+let quickFilters={hideWatched:false,essentialsOnly:false,inProgress:false};
+let noteTargetId=null;
+
+// ── RUNTIME PARSER (minutes) ──
+function parseRuntime(r){
+  if(!r)return 0;
+  let m=0;
+  const h=r.match(/(\d+(?:\.\d+)?)\s*h/);const mn=r.match(/(\d+)\s*m/);
+  if(h)m+=parseFloat(h[1])*60;
+  if(mn)m+=parseInt(mn[1]);
+  // ~Xh format
+  if(!h&&!mn){const a=r.match(/~?(\d+)/);if(a)m=parseInt(a[1])*60;}
+  return Math.round(m);
+}
+function fmtHours(m){
+  if(m<60)return m+'m';
+  const h=Math.round(m/60);
+  return h>=24?Math.round(h/24)+'d '+Math.round(h%24)+'h':h+'h';
+}
+
+// ── STORAGE ──
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SK))||{};
+    W=s.watched||{};EP=s.episodes||{};NOTES=s.notes||{};CUSTOM=s.custom||[];
+    if(CUSTOM.length)nextCID=Math.max(...CUSTOM.map(c=>c.id))+1;
+  }catch(_){W={};EP={};NOTES={};CUSTOM=[];}
+}
+function persist(){
+  const el=document.getElementById('save-pill');
+  el.textContent='SAVING';el.className='save-pill saving';
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    try{localStorage.setItem(SK,JSON.stringify({watched:W,episodes:EP,notes:NOTES,custom:CUSTOM}));}catch(_){}
+    el.textContent='SAVED';el.className='save-pill saved';
+    setTimeout(()=>{el.className='save-pill';el.textContent='';},2000);
+  },300);
+}
+
+// ── TOGGLE ──
+function toggleMovie(id){W[id]=!W[id];persist();render();}
+function setEp(id,n,total){
+  const cur=EP[id]||0;EP[id]=cur===n?n-1:n;
+  W[id]=EP[id]>=total;persist();render();
+}
+function toggleShow(id){document.getElementById('show-'+id).classList.toggle('open');}
+
+// ── QUICK FILTERS ──
+function toggleQuick(key){
+  quickFilters[key]=!quickFilters[key];
+  document.getElementById('qf-'+key.replace(/([A-Z])/g,'-$1').toLowerCase()).classList.toggle('active',quickFilters[key]);
+  render();
+}
+
+// ── NOTES ──
+function openNote(id,title,e){
+  e.stopPropagation();
+  noteTargetId=id;
+  document.getElementById('note-modal-title').textContent=title;
+  document.getElementById('note-modal-text').value=NOTES[id]||'';
+  document.getElementById('modal-note').classList.add('open');
+  setTimeout(()=>document.getElementById('note-modal-text').focus(),100);
+}
+function saveNote(){
+  const v=document.getElementById('note-modal-text').value.trim();
+  if(v)NOTES[noteTargetId]=v;else delete NOTES[noteTargetId];
+  persist();closeModal('modal-note');render();
+}
+
+// ── ADD / EDIT / DELETE ──
+function openAddModal(){
+  document.getElementById('f-edit-id').value='';
+  document.getElementById('modal-add-title').textContent='Add a Title';
+  document.getElementById('btn-submit-add').textContent='Add Title';
+  ['f-title','f-year','f-runtime','f-where','f-episodes','f-note'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('f-type').value='Movie';
+  document.getElementById('f-universe').value='MCU';
+  document.getElementById('f-tier').value='Essential';
+  document.getElementById('f-phase').value='';
+  document.getElementById('ep-field').classList.remove('show');
+  document.getElementById('modal-add').classList.add('open');
+  setTimeout(()=>document.getElementById('f-title').focus(),100);
+}
+function openEditModal(id,e){
+  e.stopPropagation();
+  const m=CUSTOM.find(c=>c.id===id);if(!m)return;
+  document.getElementById('f-edit-id').value=id;
+  document.getElementById('modal-add-title').textContent='Edit Title';
+  document.getElementById('btn-submit-add').textContent='Save Changes';
+  document.getElementById('f-title').value=m.title||''
+  document.getElementById('f-year').value=m.year||''
+  document.getElementById('f-type').value=m.type||'Movie'
+  document.getElementById('f-universe').value=m.universe||'MCU'
+  document.getElementById('f-tier').value=m.tier||'Essential'
+  document.getElementById('f-phase').value=m.phase||''
+  document.getElementById('f-runtime').value=m.runtime||''
+  document.getElementById('f-where').value=m.where||''
+  document.getElementById('f-episodes').value=m.episodes||''
+  document.getElementById('f-note').value=NOTES[id]||''
+  onTypeChange();
+  document.getElementById('modal-add').classList.add('open');
+}
+function onTypeChange(){
+  const t=document.getElementById('f-type').value;
+  document.getElementById('ep-field').classList.toggle('show',t==='Show'||t==='Serial');
+}
+function submitAdd(){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){document.getElementById('f-title').style.borderColor='#C8324A';return;}
+  document.getElementById('f-title').style.borderColor='';
+  const editId=document.getElementById('f-edit-id').value;
+  const type=document.getElementById('f-type').value;
+  const note=document.getElementById('f-note').value.trim();
+  const item={
+    id:editId?parseInt(editId):nextCID++,
+    title,
+    year:parseInt(document.getElementById('f-year').value)||new Date().getFullYear(),
+    universe:document.getElementById('f-universe').value,
+    type,tier:document.getElementById('f-tier').value,
+    phase:document.getElementById('f-phase').value||undefined,
+    runtime:document.getElementById('f-runtime').value.trim()||undefined,
+    where:document.getElementById('f-where').value.trim()||undefined,
+    episodes:(type==='Show'||type==='Serial')?parseInt(document.getElementById('f-episodes').value)||null:undefined,
+  };
+  if(editId){CUSTOM=CUSTOM.map(c=>c.id===parseInt(editId)?item:c);}
+  else{CUSTOM.push(item);}
+  if(note)NOTES[item.id]=note;else delete NOTES[item.id];
+  persist();closeModal('modal-add');render();
+  showToast(editId?'Title updated':'Title added');
+}
+function deleteCustom(id,e){
+  e.stopPropagation();
+  if(!confirm('Remove this title from your list?'))return;
+  CUSTOM=CUSTOM.filter(c=>c.id!==id);
+  delete W[id];delete EP[id];delete NOTES[id];
+  persist();render();showToast('Title removed');
+}
+
+// ── MODAL HELPERS ──
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeOnOverlay(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+
+// ── TOAST ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ── EXPORT / IMPORT ──
+function exportProgress(){
+  const data=JSON.stringify({watched:W,episodes:EP,notes:NOTES,custom:CUSTOM},null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='marvel-watchlist-backup.json';
+  a.click();
+  showToast('Progress exported');
+}
+function triggerImport(){document.getElementById('import-file').click();}
+function importProgress(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      W=d.watched||{};EP=d.episodes||{};NOTES=d.notes||{};CUSTOM=d.custom||[];
+      if(CUSTOM.length)nextCID=Math.max(...CUSTOM.map(c=>c.id))+1;
+      persist();render();showToast('Progress imported ✓');
+    }catch(_){showToast('Import failed — invalid file');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ── VIEW ──
+function switchView(v,btn){
+  curView=v;
+  document.getElementById('view-list').style.display=v==='list'?'':'none';
+  document.getElementById('view-universe').style.display=v==='universe'?'':'none';
+  document.getElementById('view-stats').style.display=v==='stats'?'':'none';
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  render();
+}
+
+// ── SORT ──
+function sortData(arr){
+  const s=document.getElementById('sort-select').value;
+  return [...arr].sort((a,b)=>{
+    if(s==='title')return a.title.localeCompare(b.title);
+    if(s==='tier')return TIER_ORDER.indexOf(a.tier)-TIER_ORDER.indexOf(b.tier);
+    if(s==='universe')return ERA.indexOf(a.universe)-ERA.indexOf(b.universe);
+    return (a.year||9999)-(b.year||9999);
+  });
+}
+
+// ── RUNTIME CALC ──
+function calcRuntimes(all){
+  let total=0,watched=0;
+  all.forEach(m=>{
+    const mins=parseRuntime(m.runtime);
+    if(m.episodes){
+      const epMins=mins>0?mins:m.episodes*45;
+      total+=epMins;
+      if(W[m.id])watched+=epMins;
+      else if(EP[m.id]>0)watched+=Math.round((EP[m.id]/m.episodes)*epMins);
+    }else{
+      total+=mins;
+      if(W[m.id])watched+=mins;
+    }
+  });
+  return{total,watched,remaining:total-watched};
+}
+
+// ── RENDER ──
+function render(){
+  const ALL=[...DATA,...CUSTOM];
+  const q=document.getElementById('search').value.toLowerCase();
+
+  let filtered=ALL.filter(m=>{
+    if(fU!=='All'&&m.universe!==fU)return false;
+    if(fT!=='All'&&m.tier!==fT)return false;
+    if(fTy!=='All'&&m.type!==fTy)return false;
+    if(q&&!m.title.toLowerCase().includes(q))return false;
+    if(quickFilters.hideWatched&&W[m.id])return false;
+    if(quickFilters.essentialsOnly&&m.tier!=='Essential')return false;
+    if(quickFilters.inProgress&&!(EP[m.id]>0&&!W[m.id]))return false;
+    return true;
+  });
+  filtered=sortData(filtered);
+
+  // STATS
+  const tw=Object.values(W).filter(Boolean).length;
+  const et=ALL.filter(m=>m.tier==='Essential').length;
+  const ew=ALL.filter(m=>m.tier==='Essential'&&W[m.id]).length;
+  const pct=ALL.length?Math.round(tw/ALL.length*100):0;
+  document.getElementById('s-watched').textContent=tw;
+  document.getElementById('s-watched-sub').textContent='of '+ALL.length;
+  document.getElementById('s-essential').textContent=ew;
+  document.getElementById('s-essential-sub').textContent='of '+et;
+  document.getElementById('s-pct').textContent=pct+'%';
+  document.getElementById('s-rem').textContent=ALL.length-tw;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct-label').textContent=pct+'%';
+  document.getElementById('header-sub').textContent=ALL.length+' titles · 17 universes · 1944–2026';
+  document.getElementById('footer').textContent=ALL.length+' titles · progress saved to this browser';
+
+  // TIME BAR
+  const rt=calcRuntimes(ALL);
+  document.getElementById('tb-total').textContent=fmtHours(rt.total);
+  document.getElementById('tb-watched').textContent=fmtHours(rt.watched);
+  document.getElementById('tb-remaining').textContent=fmtHours(rt.remaining);
+  document.getElementById('tb-days').textContent=Math.round(rt.total/60/24)+'d';
+
+  // UNIVERSE PILLS
+  document.getElementById('uni-pills').innerHTML=['All',...ERA].map(u=>{
+    const col=UC[u]||'#C8324A';const a=fU===u;
+    return `<button class="pill${a?' active':''}" onclick="fU='${u.replace(/'/g,"\'")}';render()" style="${a?'background:'+col+'22;color:'+col+';':''}">${u==='All'?'All Universes':u}</button>`;
+  }).join('');
+
+  // TIER PILLS
+  const tierEmoji={'Essential':'🔴','Watch Once':'🟡','Optional':'🔵','Skip':'⚫'};
+  document.getElementById('tier-pills').innerHTML=['All','Essential','Watch Once','Optional','Skip'].map(t=>{
+    const c=TC[t];const a=fT===t;
+    return `<button class="pill${a?' active':''}" onclick="fT='${t}';render()" style="${a&&c?'background:'+c.bg+';color:'+c.color+';':''}">${t==='All'?'All Tiers':tierEmoji[t]+' '+t}</button>`;
+  }).join('');
+
+  // TYPE PILLS
+  document.getElementById('type-pills').innerHTML=['All','Movie','Show','Special','Serial'].map(t=>{
+    const a=fTy===t;
+    return `<button class="pill${a?' active':''}" onclick="fTy='${t}';render()" style="${a?'background:rgba(255,255,255,0.07);color:var(--text);':''}">${t==='All'?'All Types':t}</button>`;
+  }).join('');
+
+  document.getElementById('filter-count').textContent='Showing '+filtered.length+' of '+ALL.length+' titles';
+
+  // LIST
+  if(curView==='list'){
+    document.getElementById('list').innerHTML=filtered.length===0
+      ?'<div class="empty">Nothing matches your filters.</div>'
+      :filtered.map(m=>{
+        const iw=!!W[m.id];
+        const inProg=m.episodes&&EP[m.id]>0&&!iw;
+        const col=UC[m.universe]||'#555';
+        const tc=TC[m.tier]||{color:'#555',bg:'transparent'};
+        const isCustom=m.id>=90000;
+        const hasNote=!!NOTES[m.id];
+
+        if(m.episodes!=null){
+          const done=EP[m.id]||0;const total=m.episodes;
+          const epPct=Math.round(done/total*100);
+          const dots=Array.from({length:total},(_,i)=>{
+            const n=i+1;const cls=n<=done?'ep-dot watched':'ep-dot';
+            return `<div class="${cls}" onclick="event.stopPropagation();setEp(${m.id},${n},${total})" title="Ep ${n}">${n}</div>`;
+          }).join('');
+          return `<div class="show-block${inProg?' in-progress':''}" id="show-${m.id}">
+            <div class="show-header${iw?' watched-show':''}" onclick="toggleShow(${m.id})">
+              <div class="checkbox">${iw?'✓':done>0?'▶':''}</div>
+              <div class="ubar" style="background:${col}"></div>
+              <div>
+                <div class="item-title-row">
+                  <span class="item-title">${m.title}</span>
+                  <span class="tier-badge" style="color:${tc.color};background:${tc.bg}">${m.tier}</span>
+                  ${m.phase?`<span class="phase-tag">${m.phase}</span>`:''}
+                  ${isCustom?'<span class="custom-badge">Custom</span>':''}
+                  ${hasNote?'<span class="note-indicator">📝</span>':''}
+                </div>
+                <div class="item-meta">
+                  <span style="color:${col};opacity:.8">${m.universe}</span>
+                  <span>${m.year||''}</span>
+                  <span style="color:${inProg?col:'var(--text3)'}">${done}/${total} eps</span>
+                  ${m.where?`<span>${m.where}</span>`:''}
+                </div>
+              </div>
+              <div class="item-right">
+                <div class="item-right-info">
+                  <div class="item-runtime">${m.runtime||''}</div>
+                </div>
+                <button class="icon-btn" onclick="openNote(${m.id},\`${m.title.replace(/\`/g,'\\`')}\`,event)" title="Note">📝</button>
+                ${isCustom?`<button class="icon-btn" onclick="openEditModal(${m.id},event)" title="Edit">✎</button><button class="icon-btn del" onclick="deleteCustom(${m.id},event)" title="Remove">✕</button>`:''}
+                <div class="expand-icon">▾</div>
+              </div>
+            </div>
+            <div class="ep-panel">
+              <div class="ep-info">
+                <div class="ep-label">Episode Progress</div>
+                <div class="ep-counter" style="color:${col}">${done} <span style="color:var(--text3);font-size:14px">/ ${total}</span></div>
+              </div>
+              <div class="ep-track"><div class="ep-fill" style="width:${epPct}%;background:${col}"></div></div>
+              <div class="ep-steps">${dots}</div>
+            </div>
+          </div>`;
+        }
+
+        return `<div class="item${iw?' watched':''}" onclick="toggleMovie(${m.id})">
+          <div class="checkbox">${iw?'✓':''}</div>
+          <div class="ubar" style="background:${col}"></div>
+          <div>
+            <div class="item-title-row">
+              <span class="item-title">${m.title}</span>
+              <span class="tier-badge" style="color:${tc.color};background:${tc.bg}">${m.tier}</span>
+              ${m.phase?`<span class="phase-tag">${m.phase}</span>`:''}
+              ${isCustom?'<span class="custom-badge">Custom</span>':''}
+              ${hasNote?'<span class="note-indicator">📝</span>':''}
+            </div>
+            <div class="item-meta">
+              <span style="color:${col};opacity:.8">${m.universe}</span>
+              <span>${m.year||''}</span><span>${m.type}</span>
+              ${m.where?`<span>${m.where}</span>`:''}
+            </div>
+          </div>
+          <div class="item-right">
+            <div class="item-right-info">
+              <div class="item-runtime">${m.runtime||''}</div>
+            </div>
+            <button class="icon-btn" onclick="openNote(${m.id},\`${m.title.replace(/\`/g,'\\`')}\`,event)" title="Note">📝</button>
+            ${isCustom?`<button class="icon-btn" onclick="openEditModal(${m.id},event)" title="Edit">✎</button><button class="icon-btn del" onclick="deleteCustom(${m.id},event)" title="Remove">✕</button>`:''}
+          </div>
+        </div>`;
+      }).join('');
+  }
+
+  // UNIVERSE VIEW
+  if(curView==='universe'){
+    const map={};
+    ALL.forEach(m=>{
+      if(!map[m.universe])map[m.universe]={total:0,w:0};
+      map[m.universe].total++;if(W[m.id])map[m.universe].w++;
+    });
+    document.getElementById('uni-list').innerHTML=ERA.map(u=>{
+      const d=map[u];if(!d)return'';
+      const p=Math.round(d.w/d.total*100);const col=UC[u]||'#666';
+      return `<div class="uni-card">
+        <div class="uni-top">
+          <div class="uni-left"><div class="uni-dot" style="background:${col}"></div>
+            <div><div class="uni-name">${u}</div><div class="uni-count">${d.w} of ${d.total} titles</div></div>
+          </div>
+          <div class="uni-pct" style="color:${col}">${p}%</div>
+        </div>
+        <div class="uni-track"><div class="uni-fill" style="width:${p}%;background:${col}"></div></div>
+      </div>`;
+    }).join('');
+  }
+
+  // STATS VIEW
+  if(curView==='stats'){
+    const tiers=['Essential','Watch Once','Optional','Skip'];
+    const tierCards=tiers.map(t=>{
+      const total=ALL.filter(m=>m.tier===t).length;
+      const done=ALL.filter(m=>m.tier===t&&W[m.id]).length;
+      const tc2=TC[t]||{color:'#555'};
+      return `<div class="tier-card" style="border-top:2px solid ${tc2.color}">
+        <div class="tier-card-val" style="color:${tc2.color}">${done}</div>
+        <div class="tier-card-label">${t}</div>
+        <div class="tier-card-sub">${done} of ${total} watched</div>
+      </div>`;
+    }).join('');
+
+    // Next up — first 5 unwatched essentials
+    const nextUp=ALL.filter(m=>m.tier==='Essential'&&!W[m.id]).sort((a,b)=>(a.year||9999)-(b.year||9999)).slice(0,6);
+    const nextItems=nextUp.map((m,i)=>{
+      const col=UC[m.universe]||'#555';
+      return `<div class="next-item">
+        <div class="next-num">${i+1}</div>
+        <div class="next-info">
+          <div class="next-title">${m.title}</div>
+          <div class="next-meta" style="color:${col}">${m.universe} · ${m.year||''} · ${m.type}</div>
+        </div>
+        <span class="item-runtime">${m.runtime||''}</span>
+      </div>`;
+    }).join('');
+
+    // In-progress shows
+    const inProg=ALL.filter(m=>m.episodes&&EP[m.id]>0&&!W[m.id]);
+    const inProgItems=inProg.length?inProg.map(m=>{
+      const col=UC[m.universe]||'#555';
+      const done=EP[m.id]||0;const total=m.episodes;
+      const pct=Math.round(done/total*100);
+      return `<div class="next-item">
+        <div class="next-num" style="color:var(--gold)">▶</div>
+        <div class="next-info">
+          <div class="next-title">${m.title}</div>
+          <div class="next-meta" style="color:${col}">${done}/${total} eps · ${pct}%</div>
+        </div>
+      </div>`;
+    }).join(''):'<div style="color:var(--text3);font-size:12px;padding:10px 0">No shows in progress</div>';
+
+    document.getElementById('stats-view').innerHTML=`
+      <div><div class="stats-section-title">Breakdown by Tier</div><div class="tier-breakdown">${tierCards}</div></div>
+      <div class="next-up"><div class="next-up-title">Currently In Progress</div>${inProgItems}</div>
+      <div class="next-up"><div class="next-up-title">Watch Next — Unwatched Essentials</div>${nextItems}</div>`;
+  }
+
+  // LEGEND
+  document.getElementById('legend-unis').innerHTML=ERA.map(k=>
+    `<div class="legend-row"><div class="ldot" style="background:${UC[k]}"></div>${k}</div>`
+  ).join('');
+}
+
+load();render();
+</script>
+</body>
+</html>
